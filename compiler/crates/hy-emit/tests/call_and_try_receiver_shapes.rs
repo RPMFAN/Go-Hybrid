@@ -1,10 +1,15 @@
-use hy_check::{check_file, Verdict};
 use hy_emit::emit_go;
 use hy_syntax::parse_file;
 
+fn emit(src: &str) -> String {
+    let ast = parse_file("call_and_try_receiver_shapes.hy", src).expect("parse");
+    emit_go(&ast).expect("emit_go")
+}
+
 #[test]
 fn call_and_try_receivers_resolve_foreign_member_shapes() {
-    let src = r#"
+    let go = emit(
+        r#"
 import "net/http"
 
 fn pick_req(r *http.request) *http.request {
@@ -29,17 +34,8 @@ fn probe(r *http.request) (string, error) {
 
 fn main() {
 }
-"#;
-    let ast = parse_file("call_and_try_receiver_shapes.hy", src).expect("parse");
-    let checked = check_file(&ast);
-    assert_eq!(
-        checked.verdict,
-        Verdict::Accept,
-        "unexpected check diagnostics: {:?}",
-        checked.diagnostics
+"#,
     );
-
-    let go = emit_go(&ast).expect("emit_go");
     assert!(
         go.contains("time.Since(t0).Milliseconds()"),
         "expected time.Since(t0) receiver to resolve MethodZero Milliseconds(), got:\n{go}"

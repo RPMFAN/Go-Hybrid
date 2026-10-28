@@ -22,7 +22,6 @@ dependencies = [
 name = "hy-emit"
 version = "0.0.1"
 dependencies = [
- "hy-check",
  "hy-syntax",
 ]
 
